@@ -1,0 +1,126 @@
+{
+    "define": [
+        [
+            "DOMAIN",
+            "usid.store"
+        ],[
+            "TITLE",
+            "USID - Store Your Wealth"
+        ],[
+            "VIEWPORT",
+            "width=device-width,initial-scale=0.75"
+        ],[
+            "PROTOCOL",
+            "https"
+        ],[
+            "SOLVEMEDIA_CKEY",
+            "AveziGo6E8rmYTbzLHHaxG6js6wJ9bxw"
+        ],[
+            "SOLVEMEDIA_VKEY",
+            "ca.o5FvnCOcs-hO77FfPiLVKXIdIw4DS"
+        ],[
+            "SOLVEMEDIA_HKEY",
+            "6v02xZ7-5Tsy7Qzt0X827UFPGIsWmkoH"
+        ],[
+            "DESCRIPTION",
+            "Earn an allowance while safely enjoying mobile connectivity devices."
+        ],[
+            "ENCODING",
+            "UTF-8"
+        ],[
+            "iiLANGUAGE",
+            "en"
+        ],[
+            "iiCOUNTRY",
+            "US"
+        ],[
+            "CONTENT",
+            "text/html"
+        ],[
+            "CURRENT",
+            "{getcwd}"
+        ],[
+            "DISPLAY_ERRORS",
+            true
+        ],[
+            "STARTUP_ERRORS",
+            true
+        ],[
+            "UPLOADS",
+            false
+        ],[
+            "MULTIBYTE",
+            true
+        ],[
+            "TIMEZONE",
+            "America/Los_Angeles"
+        ],[
+            "SUBSTITUTE",
+            "None"
+        ],[
+            "USER_AGENT",
+            "USID.STORE by C.M.R - Sorry if I overboard the data."
+        ],[
+            "TIMEOUT",
+            60
+        ],[
+            "CONV_MIME_TYPE",
+            "(text/|application/xhtml\\+xml)"
+        ],[
+            "LANGUAGE",
+            "Neutral"
+        ]
+    ],
+    "error_reporting": "E_ALL",
+    "date_default_timezone_set": "{TIMEZONE}",
+    "setlocale": [
+        "LC_ALL",
+        "{ENCODING}.{iiLANGUAGE}",
+        "{iiLANGUAGE}"
+    ],
+    "mb_http_input": "{ENCODING}",
+    "mb_http_output": "{ENCODING}",
+    "mb_internal_encoding": "{ENCODING}",
+    "mb_regex_encoding": "{ENCODING}",
+    "mb_substitute_character": "{SUBSTITUTE}",
+    "mb_language": "{LANGUAGE}",
+    "mbstring_http_output_conv_mimetype": "{CONV_MIME_TYPE}",
+    "bindtextdomain": [
+        "{DOMAIN}",
+        "locale/"
+    ],
+    "textdomain": "{DOMAIN}",
+    "ini_set": [
+        [
+            "display_errors",
+            "{DISPLAY_ERRORS}"
+        ],[
+            "display_startup_errors",
+            "{STARTUP_ERRORS}"
+        ],[
+            "default_charset",
+            "{ENCODING}"
+        ],[
+            "user_agent",
+            "{USER_AGENT}"
+        ],[
+            "default_socket_timeout",
+            "{TIMEOUT}"
+        ],[
+            "include_path",
+            ".:{CURRENT}"
+        ],[
+            "input_encoding",
+            "{ENCODING}"
+        ],[
+            "output_encoding",
+            "{ENCODING}"
+        ],[
+            "max_execution_time",
+            10
+        ],[
+            "memory_limit",
+            "512M"
+        ]
+    ]
+}
