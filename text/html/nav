@@ -1,0 +1,34 @@
+<div class="collapse hide" id="navbar">
+<nav class="navbar font-monospace border-bottom border-light shadow" role="navigation">
+<form id="user-input" name="ui" class="my-2 mx-auto">
+<div class="container-fluid">
+<div class="input-group input-group-lg justify-content-space-between" id="input-group">
+<button id="disregard" class="navbar-toggler rounded-start-1" data-bs-toggle="collapse" data-bs-target="#navbar">
+<i id="three-dots" class="bi bi-three-dots">
+</i>
+</button>
+<div id="email-address" class="form-floating" hidden>
+<input aria-describedby="email" aria-labelledby="email" class="form-control user-select-all" id="email" autocomplete="email" enterkeyhint="done" inputmode="email" spellcheck="false" minlength="4" maxlength="254" placeholder="email@example.com" name="email" type="email" required title="Provide an active PayPal Email Address for atuomated payouts." />
+<label id="address" for="email">
+<i class="bi bi-paypal">
+</i>
+Email Address
+</label>
+</div>
+<div class="input-group-text bg-dark-subtle placeholder-glow" data-bs-toggle="tooltip" data-bs-placement="bottom" id="tooltip" title="We are patiently growing a Local Session Tree...">
+<div class="spinner-grow spinner-color" id="basic-addon-spinner" role="status">
+<span class="visually-hidden">
+We are patiently growing a Local Session...
+</span>
+</div>
+</div>
+<button class="navbar-toggler rounded-end-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" aria-controls="offcanvas">
+<i class="navbar-toggler-icon">
+</i>
+</button>
+</div>
+</div>
+</form>
+{offcanvas}
+</nav>
+</div>

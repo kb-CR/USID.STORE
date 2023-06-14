@@ -1,0 +1,269 @@
+class product
+{
+    private string $subid = '';
+    private string $subid2 = '';
+    private string $subid3 = '';
+    private string $country = '';
+    private string $language = '';
+    private string $linksets = 'application/linkset/';
+    private string $wordsets = 'application/wordset/';
+
+    public function __construct(string $subid, string $subid2, string $subid3)
+    {
+        $this->subid = $subid;
+        $this->subid2 = $subid2;
+        $this->subid3 = $subid3;
+    }
+    
+    public function wordset($wordset)
+    {
+        if(file_exists($this->wordsets))
+        {
+            $json = file_get_contents($this->wordsets . route::code()->language);
+            $wordset = json_decode($json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $iterator = new ArrayIterator($wordset);
+            do
+            {
+                $key = $iterator->key();
+                $value = $iterator->current();
+                if(isset($wordset[$key]))
+                {
+                    $wordset[$key] += $value;
+                    $wordset[$key] /= 2;
+                }
+                else
+                {
+                    $wordset[$key] = $value;
+                }
+                $iterator->next();
+            } while($iterator->valid());
+        }
+        $json = json_encode($wordset, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        file_put_contents($this->wordsets . route::code()->language, $json);
+        return $wordset;
+    }
+
+    public function linkset($linkset)
+    {
+        $json = json_encode($linkset, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        file_put_contents($this->linksets . $this->subid3, $json);
+        $this->unlinksets();
+        return $linkset;
+    }
+    
+    public function unlinksets()
+    {
+        $directory = new DirectoryIterator($this->linksets);
+        do
+        {
+            $current = $directory->current();
+            if($current->isDot())
+            {
+                $directory->next();
+                continue;
+            }
+            if(time() - $current->getMTime() > 10800)
+            {
+                unlink($current->getRealPath());
+            }
+            $directory->next();
+        } while($directory->valid());
+    }
+    
+    public function offers()
+    {
+        $platform = ['android','ios'];
+        $platforms = route::platform();
+        if($platforms->android)
+        {
+            unset($platform['ios']);
+        }
+        else if($platforms->ios)
+        {
+            unset($platform['android']);
+        }
+        $uri = cpalead::request([
+            'platform' => $platform,
+            'country' => route::code()->country,
+            'subid' => $this->subid,
+            'subid2' => $this->subid2,
+            'subid3' => $this->subid3,
+            'affiliate_id' => 2406577,
+            'offerwall_only' => true,
+            'format' => 'json',
+            'dating' => true
+        ]);
+        $json = file_get_contents($uri);
+        return (json_decode($json, false, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))->offers;
+    }
+    
+    public function mobile_application($id, $uri)
+    {
+        $mobile_applications = join('/', [
+            'application/ld+json',
+            route::code()->language,
+            ''
+        ]);
+        $mobile_application =  $mobile_applications . $id;
+        if(file_exists($mobile_application) === false)
+        {
+            $contents = file_get_contents($uri);
+            $dom = new dom();
+            $jsonld = dom::getJSONLDListByType($dom->toDOMDocument($contents), 'SoftwareApplication');
+            unset($contents);
+            // android bundle ids are given upfront, apple needs to scrape then output.
+            if(file_exists($mobile_applications) === false) {
+                mkdir($mobile_applications, 0777);
+            }
+            if(isset($jsonld['url'])) {
+                $url = parse_url($jsonld['url']);
+                parse_str($url['query'], $search);
+                if(isset($search['hl'])) {
+                    $this->language = $search['hl'];
+                }
+                if(isset($search['gl'])) {
+                    $this->country = $search['gl'];
+                }
+            }
+            file_put_contents($mobile_application, json_encode($jsonld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            foreach($jsonld as $key => $value) {
+                if(strcasecmp($key[0], '@') === 0) {
+                    $key = mb_substr($key, 1, null, 'UTF-8');
+                }
+            }
+            $offered = $jsonld;
+        }
+        else
+        {
+            $contents = file_get_contents($mobile_application);
+            $offered = json_decode($contents, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
+        }
+        return (object) $offered;
+    }
+
+    public function series()
+    {
+        $images = [];
+        $words = [];
+        $links = [];
+        $offers = $this->offers();   
+        $itertor = new ArrayIterator($offers);
+        do
+        {
+            $offer = $itertor->current();
+            $offer->link =  trim($offer->link, '&gaid=&idfa=');
+            $offer->amount =  floatval($offer->amount);
+            $offer->conversion =  trim($offer->conversion);
+            if(mb_stristr($offer->preview_url, 'play.google.com') || mb_stristr($offer->preview_url, 'apps.apple.com'))
+            {
+                $conversion = preg_replace("/\s?\(.*\)/s", '', trim($offer->conversion));
+                $conversion = preg_split('/[\+\,]|&| and |\n/iUu', $conversion);
+                $conversion = new ArrayIterator($conversion);
+                $conversion->rewind();
+                do
+                {
+                    $key = $conversion->key();
+                    $value = $conversion->current();
+                    $tokens = cpalead::tokenize($value);
+                    $token_amount = $offer->amount;
+                    $tokenset = [];
+                    $parts = 2;
+                    do
+                    {
+                        $token = array_shift($tokens);
+                        $ttoken = trim($token);
+                        $token_value = number_format($token_amount / $parts, 5);
+                        if(empty($ttoken) === false)
+                        {
+                            if(is_numeric($ttoken))
+                            {
+                                $token_value = number_format($token_value / intval($token), 5);
+                                $tokenset[] = $token;
+                            }
+                            else
+                            {
+                                $token_value = number_format($token_value, 5);
+                                $tokenset[] = $token;
+                            }
+                            if(isset($wordset[$token]))
+                            {
+                                $wordset[$token] += $token_value;
+                                $wordset[$token] /= 2;
+                            }
+                            else
+                            {
+                                $wordset[$token] = $token_value;
+                            }
+                            $parts++;
+                        }
+                        else
+                        {
+                            $tokenset[] = $token;
+                        }
+                    } while(empty($tokens) === false);
+                    $conversion[$key] = $tokenset;
+                    $conversion->next();
+                } while($conversion->valid());
+                $offer->conversion = (array)$conversion;
+                $url = parse_url($offer->preview_url);
+                if(mb_stristr($offer->preview_url, 'play.google.com'))
+                {
+                    parse_str($url['query'], $query);
+                    $offer->id = $query['id'];
+                    $offer->android = true;
+                }
+                if(mb_stristr($offer->preview_url, 'apps.apple.com'))
+                {
+                    $offer->ios = true;
+                }
+                $crypt_secure_uniqid = bin2hex(random_bytes(8));
+                $links[] = [
+                    'anchor' => trim($offer->link, '&gaid=&idfa='),
+                    'href' => join('/', [
+                        'a',
+                        $this->subid3,
+                        $crypt_secure_uniqid
+                    ])
+                ];
+            }
+            if(isset($offer->id))
+            {
+                $itemOffered = $this->mobile_application($offer->id, $offer->preview_url);
+                
+                if(isset($itemOffered) && is_null($itemOffered) === false)
+                {
+                    $offer->amount = ($offer->amount / 2) * 100;
+                    $itemOffered->offers[0]['price'] =  ((round($offer->amount)%5 === 0) ? round($offer->amount) : round(($offer->amount+5/2)/5)*5 ) / 100;
+                    $itemOffered->conversion = $offer->conversion;
+                    $itemOffered->href = join('/', [
+                        'a',
+                        $this->subid3,
+                        $crypt_secure_uniqid
+                    ]);
+                    $itemOffered->id = $offer->id;
+                    $itemsOffered[] = $itemOffered;
+                    $images[] = [
+                        'tooltip' => $itemOffered->name,
+                        'image' => $itemOffered->image,
+                        'url' => $itemOffered->href,
+                        'height' => '128px',
+                        'width' => '128px',
+                        'target' => '_top'
+                    ];
+                    $itemOffered = (object)[];
+                }
+            }
+            else
+            {
+                // these are all apple apps, we need a bundle id, and have a preview url.
+            }
+            $itertor->next();
+        } while($itertor->valid());
+        return (object)[
+            'words' => $this->wordset($words),
+            'links' => $this->linkset($links),
+            'images' => $images,
+            'offereds' => $itemsOffered
+        ];
+    }
+}

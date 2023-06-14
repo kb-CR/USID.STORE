@@ -1,0 +1,52 @@
+let ASK = '?';
+let INI = '/';
+let ONT = '.';
+let ASI = ':';
+let EQL = '=';
+let AMP = '&';
+let search = function (searchParams)
+{
+    result = ASK;
+    keys = Object.getOwnPropertyNames(searchParams);
+    Array.from(keys).forEach((element, index) =>
+    {
+        if(result !== ASK)
+        {
+            result += AMP;
+        }
+        result += keys[index] + EQL + encodeURIComponent(searchParams[keys[index]]);
+    });
+    return result;
+}
+let session = {
+    load: function(type){
+        if(type.length > 0){
+            transfer(this, type);
+        }
+    },
+    set: function(json){
+        Array(json).forEach((value, index)=> {
+            sessionStorage.object(index, this[index] = value);
+        });
+    }
+}
+let set_email = function(email)
+{
+    session.email = email;
+    save(session);
+};
+let save = function(json) {
+    transfer(sessionStorage, json);
+    transfer(localStorage, json);
+    transfer(session, json);
+};
+let transfer = function(target, origin) {
+    Object.getOwnPropertyNames(origin).forEach((property) => {
+        target[property] = origin[property];
+    });
+};
+if(sessionStorage.length > 0) {
+    session.load(sessionStorage);
+} else {
+    session.load(localStorage);
+}

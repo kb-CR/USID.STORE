@@ -1,0 +1,113 @@
+class lead
+{
+    /*
+        serialize name;
+        receiver.campaign.lead
+    */
+    // unique offer campaign id
+    private $campaign = 0;
+    // lead id
+    private $lead = 0;
+    // gateway id
+    private $gateway = 0;
+    // unique id of linkset leading to conversion
+    private $linkset = '';
+    // anchor of the external link, parsed for data simplicity
+    private $anchor = '';
+    // email address of lead
+    private $receiver = '';
+    // paypal email system distributed funding through
+    private $sender = '';
+    // country iso code
+    private $country = '';
+    // amount sent to receiver from sender
+    private $offer = 0.00;
+    // amount estimated as profit within net 30 window
+    private $net = 0.00;
+    // amount campaign offers per converson
+    private $gross = 0.00;
+    // time outbound click was serialized
+    private $outbound = 0;
+    // time postback was serialized and payment was queued
+    private $postback = 0;
+    // time payout was successfully transfered
+    private $payout = 0;
+    // status of reversal of lead, bad lead quality mark.
+    private $reversal = false;
+
+    public function __construct($conversion = null)
+    {
+        if(is_null($conversion) === false)
+        {
+            $this->campaign = $conversion->campaign_id;
+            $this->receiver = $conversion->subid;
+            $this->anchor = $conversion->subid3;
+            $this->gross = $conversion->payout;
+            $this->offer = lead::payout_share($conversion->payout);
+            $this->net = $conversion->payout - $this->offer;
+            $this->country = $conversion->country_iso;
+        }
+    }
+
+    public function ___destruct()
+    {
+        if(isset($this->receiver) && isset($this->campaign) && isset($this->lead))
+        {
+
+        }
+    }
+
+    public function outbound($linkset, $externalset, $anchor)
+    {
+        $this->linkset = $linkset . '.' . $externalset;
+        $this->anchor = $anchor;
+        $this->outbound = time();
+    }
+
+    public function postback($conversion = null)
+    {
+        if(is_null($conversion) === false && isset($conversion->lead_id))
+        {
+            $this->postback = time();
+            $this->lead = $conversion->lead_id;
+        }
+    }
+
+    public static function payout($conversion = null) {
+        if(is_null($conversion) === false)
+        {
+            $amount = paypal::payout_share($conversion->payout); // todo round 5s from offers document
+            $oath2 = paypal::oauth2();
+            if(paypal::available_balance($oath2, 'USD') > $amount)
+            {
+                if(paypal::payout(
+                    $oath2,
+                    $conversion->campaign_id,
+                    $amount,
+                    "Congratulations on accepting an USID.Store offer for Payout!",
+                    "{$conversion->campaign_id}.{$conversion->lead_id}.{$conversion->subid3}",
+                    "USID.Store Paidout!",
+                    'The Paypal linked to this Email Address has been sent $'."{$conversion->amount} for engaging with an application offer at USID.Store,\r\nMake sure to visit each day and maximize global mobile empowerment!"
+                ) !== false)
+                {
+                    //update tracking info for successful payout
+                    $this->offer = $amount;
+                    $this->payout = time();
+                    $this->sender = 'PayPal@USID.Store';
+                    $this->country = $conversion->country_iso;
+                    $this->lead = $conversion->lead_id;
+                    return true;
+                }
+            }
+            // update tracking info for failure to pay, also deal with cron jobs
+            $this->payout = 0;
+            return false;
+        }
+    }
+
+    public static function payout_share($offer_amount)
+    {
+        $amount = ($offer_amount / 2) * 100;
+        return ((round($amount)%5 === 0) ? round($amount) : round(($amount+5/2)/5)*5 ) / 100;
+    }
+}

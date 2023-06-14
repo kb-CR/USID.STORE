@@ -1,0 +1,107 @@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
+<div class="offcanvas-header">
+<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+</button>
+<h5 class="offcanvas-title user-select-none me-5 pe-5 mt-3" id="offcanvasLabel">
+<a href="https://usid.store/" target="_blank" title="USID - Store Your Wealth" aria-current="page">
+<img src="image/png/usid-logo.png" alt="USID - Store Your Wealth." />
+</a>
+</h5>
+</div>
+<div class="offcanvas-body">
+<ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+<li class="nav-item dropdown text-center">
+<a class="nav-link active dropdown-toggle" aria-current="page" href="#list-filter" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+<i class="bi bi-app pe-1">
+</i>
+<i>
+Application
+</i>
+</a>
+<ul class="dropdown-menu pt-0 border-top-0">
+<form class="rounded-bottom-0 d-flex mb-0 mt-0" role="search">
+<input class="form-control rounded-bottom-0 rounded-end-0 mb-0 border-start-0 border-end-0" type="search" placeholder="Filter" id="filter" aria-label="Filter" />
+<button class="btn rounded-bottom-0 rounded-start-0 border-end-0 position-relative" type="button" id="addon-button">
+<span class="position-relative">
+<i class="bi text-primary bi-funnel-fill text-opacity-50 position-absolute d-inline-block overflow-hidden visually-hidden h-25" id="limit">
+</i>
+</span>
+<span>
+<i class="bi bi-funnel">
+</i>
+</span>
+</button>
+</form>
+<li>
+<a class="dropdown-item" href="#puzzle-game">
+Puzzle Game
+</a>
+</li>
+<li>
+<a class="dropdown-item" href="#entertainment">
+Entertainment
+</a>
+</li>
+</ul>
+</li>
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle text-center" href="#marketplace" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+<i class="bi bi-shop-window pe-1">
+</i>
+<i>
+Marketplace
+</i>
+</a>
+<ul class="dropdown-menu text-center">
+<li>
+<a class="dropdown-item" href="#google-play" title="Google Play">
+<i class="bi bi-google-play pe-1">
+</i>
+<i class="w-50 text-start">
+Google Play
+</i>
+</a>
+</li>
+<li>
+<a class="dropdown-item" href="#the-apple-app-store" title="App Store">
+<i class="bi bi-apple pe-1">
+</i>
+<i class="w-50 text-start">
+App Store
+</i>
+</a>
+</li>
+<li>
+<a class="dropdown-item" href="https://cpalead.com/get-started.php?ref=2406577" title="CPALead">
+<i class="bi bi-bank2 pe-1">
+</i>
+<i class="w-50 text-start">
+CPALead
+</i>
+</a>
+</li>
+<li>
+<a class="dropdown-item" href="https://www.hostinger.com/?REFERRALCODE=1CHRISTOPHE27#:~:text=7%20Customer%20Support-,Web%20Hosting,-%24" title="Hostinger - The Hosting Platform Made For You.">
+<i class="bi bi-ethernet pe-1">
+</i>
+<i class="w-50 text-start">
+Hostinger
+</i>
+</a>
+</li>
+<li>
+<a class="dropdown-item" href="https://www.hcaptcha.com/?r=2bf0c621740b#:~:text=Earn%20rewards%20for%20human%20solves" title="hCaptcha">
+<i class="bi bi-robot">
+</i>
+<i class="w-50 text-start">
+hCaptcha
+</i>
+</a>
+</li>
+
+
+</ul>
+</li>
+</ul>
+</div>
+</div>

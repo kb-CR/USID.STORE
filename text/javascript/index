@@ -1,0 +1,223 @@
+let c = async function (cpalead) {
+    let subid = [];
+    let carousel = document.body.getElementsByClassName("carousel-inner")[0];
+    let item = carousel.getElementsByClassName("carousel-item")[0];
+    let itemClone = item.cloneNode(true);
+    //item.remove();
+    let offerIndex = 0;
+    
+    cpalead.offers = [...new Set(cpalead.offers)];
+    cpalead.offers.forEach((offer, index) => {
+      if(offer.preview_url) {
+        let preview_url = new URL(offer.preview_url);
+        if(preview_url.hostname == 'play.google.com' || preview_url.hostname == 'apps.apple.com') {
+          let itemCloned = itemClone.cloneNode(true);
+          if(offerIndex == 0) {
+            itemCloned.classList.add("active");
+          }
+
+          itemCloned.setAttribute("offer", offerIndex);
+
+          let jsonld = {};
+          let image = itemCloned.getElementsByTagName("img")[0];
+          let figure_caption = itemCloned.getElementsByClassName("figure-caption")[0];
+          switch(preview_url.hostname) {
+            case 'play.google.com':
+              image.src = `a/` + encodeURI(btoa(`${sess}/${preview_url.searchParams.get('id')}/img`));
+              jsonld = `a/` + encodeURI(btoa(`${sess}/${preview_url.searchParams.get('id')}/jsonld`));
+              break;
+            case 'apps.apple.com':
+              let id = preview_url.pathname.slice(1);
+              id = id.replace(/\//g, '.');
+              image.src = `a/` + encodeURI(btoa(`${sess}/${id}/img`));
+              jsonld = `a/` + encodeURI(btoa(`${sess}/${id}/jsonld`));
+              break;
+          }
+          
+          let description = itemCloned.getElementsByClassName("card-text")[0];
+          let conversion = itemCloned.getElementsByClassName("list-group")[0];
+          let buttons = itemCloned.getElementsByClassName("btn");
+          let url = new URL(offer.link);
+          let id = url.searchParams.get('id');
+          let token = url.searchParams.get('token');
+          let titleKeyList, title, subtitle = undefined;
+          buttons[0].parentNode.setAttribute("action", `v/` + encodeURI(btoa(`${sess}/${id}/${token}`)));
+
+          const response = fetch(jsonld, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(offer)
+          }).then((response) => {
+            response.json().then((json) => {
+              if(json['@type'] != undefined) {
+                let chars = Math.min(json.description.length, 98); // +42 = 140
+                let position = json.description.length;
+                ['.', '!', '?'].forEach((element, index) => {
+                    let indexOf = json.description.indexOf(element, chars);
+                    if(indexOf < position && indexOf > -1) {
+                    position = indexOf;
+                    }
+                });
+                description.innerHTML = (json.description.substr(0, (position + 1)) + '.').replace(/([^A-Za-z0-9])[^A-Za-z0-9]$/, `$1`) + description.innerHTML;
+                
+                let author = itemCloned.getElementsByClassName("author")[0];
+                author.textContent = json.author.name;
+                if(json.author.url == undefined) {
+                    author.classList.add("pe-none");
+                    author.setAttribute("href", "#");
+                } else {
+                    author.setAttribute("href", json.author.url);
+                }
+                author.setAttribute("data-bs-title", "Author of " + htmlDecode(json.name));
+
+                titleKeyList = htmlDecode(json.name).split(/[^A-Za-z0-9\s\$\&\,\.\'\!\?]+/g).map(function(item) { return item.trim(' ').split(/[^A-Za-z0-9\$\&\,\.\']+/g); });
+                if(titleKeyList.length == 2 && Array.isArray(titleKeyList[0])) {
+                    title = titleKeyList[0].join(' ');
+                    subtitle = titleKeyList[1].join(' ');
+                    if(titleKeyList[0].length > titleKeyList[1].length) {
+                    title = titleKeyList[1].join(' ');
+                    subtitle = titleKeyList[0].join(' ');
+                    }
+                } else {
+                    title = titleKeyList[0].join(' ');
+                }
+                itemCloned.getElementsByClassName("card-title")[0].textContent = title;
+                if(subtitle != undefined) {
+                    itemCloned.getElementsByClassName("card-subtitle")[0].textContent = subtitle;
+                }
+                figure_caption.textContent = title;
+                image.setAttribute('alt', title);
+                buttons[0].textContent = 'Install ' + htmlDecode(json.name);
+                
+                let conversionItem = conversion.getElementsByClassName("list-group-item")[0];
+                let conversionItemClone = conversionItem.cloneNode(true);
+                conversionItem.remove();
+                let steps = offer.conversion.replace(/\((([A-Za-z0-9\.\s\S]+)?new users only)\)/ig, '').split(/and|\&|\,|\+/ig).map(function(item) { return item.trim(); });
+                steps.forEach((step, stepIndex) => {
+                    let conversionItemCloned = conversionItem.cloneNode(true);
+                    step = step.charAt(0).toUpperCase() + (step + '.').trimEnd('.').toLowerCase().slice(1);
+                    step = step.replace(title.toLowerCase(), `<mark>${title}</mark>`);
+                    
+                    let em = false;
+                    let words = step.split(/\s+/);
+                    words.forEach((word, wordIndex) => {
+                    
+                    });
+                    step = words.join(' ');
+                    conversionItemCloned.innerHTML = step;
+                    conversion.append(conversionItemCloned);
+                });
+
+                let category = itemCloned.getElementsByClassName("category")[0];
+                let nodeList = [];
+                json.applicationCategory.split(/\_and\_|\_/ig).reverse().forEach((currentValue, index) => {
+                    category.textContent = currentValue.charAt(0).toUpperCase() + currentValue.slice(1).toLowerCase();
+                    nodeList.push("\r\n");
+                    nodeList.push(category.cloneNode(true));
+                });
+                category.parentNode.prepend(...nodeList);
+                category.remove();
+
+                let os = itemCloned.getElementsByClassName("os")[0];
+                position = json.operatingSystem.toLowerCase().indexOf("ios");
+                if(position == -1) {
+                    os.innerHTML = '<i class="bi bi-google-play"></i>';
+                } else {
+                    os.innerHTML = '<i class="bi bi-apple"></i>';
+
+                }
+                
+                if(json.aggregateRating != undefined) {
+                    let rating = json.aggregateRating.ratingValue / 5 * 100 + "%";
+                    let review = parseInt(json.aggregateRating.ratingCount);
+                    if(isNaN(review) === false) {
+                      itemCloned.getElementsByClassName("review")[0].title = rating + " rating after " + review.toLocaleString() + " reviews.";
+                    }
+                    itemCloned.getElementsByClassName("rating")[0].style.maxWidth = rating;
+                    if(Object.is(offer.title, json.name)) {
+                        offer.title = json.name;
+                    }
+                }
+                //carousel.append(itemCloned);
+              }
+            }); 
+            carousel.append(itemCloned);
+          });
+          offerIndex++;
+        }
+      }
+    });
+    Array.from(document.getElementsByClassName("close")).forEach((element, index, value) => {
+      element.onclick = function(event) {
+        let next = this.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling;
+        if(next === null) {
+            next = this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.firstElementChild;
+        }
+        next.classList.add("active");
+        this.parentNode.parentNode.parentNode.parentNode.parentNode.classList.remove("active");
+        this.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
+      }
+    });
+  };
+
+  function similarity(s1, s2) {
+    var longer = s1;
+    var shorter = s2;
+    if (s1.length < s2.length) {
+      longer = s2;
+      shorter = s1;
+    }
+    var longerLength = longer.length;
+    if (longerLength == 0) {
+      return 1.0;
+    }
+    return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+  }
+
+  function editDistance(s1, s2) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
+
+    var costs = new Array();
+    for (var i = 0; i <= s1.length; i++) {
+      var lastValue = i;
+      for (var j = 0; j <= s2.length; j++) {
+        if (i == 0)
+          costs[j] = j;
+        else {
+          if (j > 0) {
+            var newValue = costs[j - 1];
+            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+              newValue = Math.min(Math.min(newValue, lastValue),
+                costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0)
+        costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
+  }
+
+  const htmlDecode = (input) => {
+    const e = document.createElement('textarea');
+    e.innerHTML = input;
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+  }
+
+  function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      obj.innerHTML = (progress * (end - start) + start).toFixed(2);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }

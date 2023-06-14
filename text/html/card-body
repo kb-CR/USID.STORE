@@ -1,0 +1,45 @@
+<div id="body" class="card-body p-2 bg-primary-subtle">
+<img class="m-0 col-5 pe-none user-select-none border border-5 border-white shadow-sm rounded-5 placeholder" type="image/png" style="height: 132px; width: 132px;" />
+<div class="flex-grow-1 col-6 float-end">
+<ul id="engagement" class="list-group list-group-flush list-group-unstyled rounded border mb-3">
+<li class="list-group-item">
+<span class="placeholder col-12">
+</span>
+</li>
+<li class="list-group-item">
+<span class="placeholder col-7">
+</span>
+</li>
+</li>
+</ul>
+</div>
+
+<span class="row g-0 col-12 mt-3">
+<div class="rounded bg-light">
+<div class="border rounded mb-0">
+<p id="description" class="col card-text lead p-2 text-end">
+<span class="placeholder col-3">
+</span>
+<span class="placeholder col-7">
+</span>
+<span class="placeholder col-1">
+</span>
+<span class="placeholder col-4 mt-1">
+</span>
+<span class="placeholder col-3 mt-1">
+</span>
+</p>
+<span class="row g-0 pe-2 align-items-center text-end rounded-bottom bg-gradient">
+<span class="col">
+<footer id="author" class="blockquote-footer g-0 p-0 m-0 position-relative">
+<a class="author stretched-link" rel="noindex,nofollow" target="_blank" title="">
+</a>
+<span class="placeholder col-4">
+</span>
+</footer>
+</span>
+</span>
+</div>
+</div>
+</span>
+</div>

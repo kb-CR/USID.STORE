@@ -1,0 +1,73 @@
+class identity
+{
+    public const LENGTH = 128;
+
+    public function __construct($name = 'identity')
+    {
+        session_write_close();
+        $this->name($name);
+        session_set_cookie_params(0);
+        session_cache_limiter('nocache');
+        ini_set('url_rewriter.tags', '');
+        ini_set('session.lazy_write', 1);
+        ini_set('session.auto_start', 0);
+        ini_set('session.use_cookies', 0);
+        ini_set('session.cache_expire', 0);
+        ini_set('session.sid_length', identity::LENGTH);
+        ini_set('session.use_trans_sid', 1);
+        ini_set('session.gc_probability', 0);
+        ini_set('session.gc_maxlifetime', 0);
+        ini_set('session.use_strict_mode', 0);
+        ini_set('session.trans_sid_tags', '');
+        ini_set('session.use_only_cookies', 0);
+        ini_set('session.sid_bits_per_character', 6);
+        ini_set('session.hash_function', 'xxh128');
+        ini_set('session.save_path', identity::path());
+    }
+
+    public function __destruct()
+    {
+        if(session_status() > 1)
+        {
+            session_destroy();
+        }
+    }
+
+    public function start()
+    {
+        session_start();
+    }
+
+    public function id($value = null)
+    {
+        if(is_null($value))
+        {
+            return session_id();
+        }
+        return session_id($value);
+    }
+
+    public function name($name)
+    {
+        if(ctype_alnum($name)) {
+            session_name($name);
+        }
+    }
+
+    public function path(): string
+    {
+        return join(INI, [
+            'text/plain',
+            session_name()
+        ]);
+    }
+
+    public function file(string $id): string
+    {
+        return join(INI, [
+            $this->path,
+            $id
+        ]);
+    }
+
+}

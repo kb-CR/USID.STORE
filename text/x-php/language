@@ -1,0 +1,51 @@
+class language extends remote
+{
+    public function __construct(string $file_name)
+    {
+        parent::__construct($file_name);
+    }
+
+    public function getLanguages(): array
+    {
+        if($this->isFile() === false || $this->expired())
+        {
+            $this->languages();
+        }
+        $file_object = $this->openFile('r', false, null);
+        $json = $file_object->fread($file_object->getSize());
+        return json_decode(
+            $json,
+            true,
+            5,
+            JSON_OBJECT_AS_ARRAY | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR
+        );
+    }
+
+    private function languages()
+    {
+        //$from_file_object = new SplFileObject('application/json/language', 'e');
+        $to = join(INI, [
+            $this->getPathInfo(),
+            __CLASS__
+        ]);
+        $to_file_info = new SplFileInfo($to);
+        $to_file_object = $to_file_info->openFile('a+', false, null);
+        $file_info = new SplFileInfo('https://1000mostcommonwords.com/languages/');
+        $file_object = $file_info->openFile('r');
+        $language = [];
+        do
+        {
+            $line = $file_object->current();
+            multibyte::match_all('\/1000-most-common-(.[^-]*)-', $line, $matches);
+            if(isset($matches[0]))
+            {
+                $language = array_merge($language, array_column($matches, 1));
+            }
+            $file_object->next();
+        }
+        while($file_object->valid());
+        $values = array_values($language);
+        $json = json_encode($values, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE, 4);
+        $to_file_object->fwrite($json);
+    }
+}

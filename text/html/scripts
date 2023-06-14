@@ -1,0 +1,9 @@
+<script src="{time}/prototype.javascript" type="text/javascript"></script>
+<script src="{time}/jquery.javascript" type="text/javascript"></script>
+<script src="{time}/bootstrap.javascript" type="text/javascript"></script>
+<script src="{time}/offers.javascript" type="text/javascript"></script>
+<script src="{time}/local.javascript" type="text/javascript"></script>
+<script src="{time}/session.javascript" type="text/javascript"></script>
+<script src="{time}/popper.javascript" type="text/javascript"></script>
+<script src='{time}/hcaptchaapi.javascript' type="text/javascript"></script>
+<script src='{time}/svg3dtagcloud.javascript' type="text/javascript"></script>

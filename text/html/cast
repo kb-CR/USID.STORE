@@ -1,0 +1,20 @@
+<div id="cast">
+    <div class="bi bi-cloud-fill" style="inset: 543px 1228px 457px 1107px; opacity: 0.576034; font-size: 296px;">
+    </div>
+    <div class="bi bi-cloud-fill" style="inset: 538px 706px 17px 1143px; opacity: 0.541454; font-size: 40px;">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+    <div class="bi bi-cloud-fill weather">
+    </div>
+</div>

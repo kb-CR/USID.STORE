@@ -1,0 +1,8 @@
+<head>
+<meta charset="{ENCODING}" />
+<meta name="description" content="{DESCRIPTION}" />
+<meta name="viewport" content="{VIEWPORT}" />
+<base target="_top" href="{PROTOCOL}://{DOMAIN}/" />
+<title>{TITLE}</title>
+{links}
+</head>

@@ -1,0 +1,31 @@
+<div class="card-footer bg-gradient  me-0 pe-0">
+<div class="row pe-2">
+<form id="get" class="col-3 m-0 pe-0">
+<button type="button" class="btn text-start btn-success bg-gradient pb-1" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+<i class="spinner-border"></i>
+</button>
+</form>
+<div id="flag" class="col-9 justify-content-end d-flex">
+<button id="platform" class="btn btn-danger me-1" type="button">
+<i class="spinner-grow"></i>
+</button>
+<button id="star" class="btn btn-primary" type="button">
+<i class="spinner-grow"></i>
+<span id="ratio-numerator" hidden>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+</span>
+<span id="ratio-denominator" hidden>
+<i class="bi bi-star"></i>
+<i class="bi bi-star"></i>
+<i class="bi bi-star"></i>
+<i class="bi bi-star"></i>
+<i class="bi bi-star"></i>
+</span>
+</button>
+</div>
+</div>
+</div>

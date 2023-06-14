@@ -1,0 +1,49 @@
+let products = [];
+let list_products = function() {
+    fetch(new Request('products?email=' + sessionStorage.email, {
+        method: 'GET'
+    })).then((response) => response.json()).then(function(data) {
+        products = data;
+        $(document).ready(function () {
+        var settings = {
+            entries: products,
+            width: '100%',
+            height: '400px',
+            radius: '128px',
+            radiusMin: '64px',
+            bgDraw: false,
+            bgColor: '#111',
+            opacityOver: 1.00,
+            opacityOut: 0.00,
+            opacitySpeed: 2,
+            fov: 1300,
+            speed: 0.5,
+            fontFamily: 'Oswald, Arial, sans-serif',
+            fontSize: '16',
+            fontColor: '#fff',
+            fontWeight: 'normal',//bold
+            fontStyle: 'normal',//italic 
+            fontStretch: 'normal',//wider, narrower, ultra-condensed, extra-condensed, condensed, semi-condensed, semi-expanded, expanded, extra-expanded, ultra-expanded
+            fontToUpperCase: true,
+            tooltipFontFamily: 'Oswald, Arial, sans-serif',
+            tooltipFontSize: '16',
+            tooltipFontColor: '#fff',
+            tooltipFontWeight: 'normal',//bold
+            tooltipFontStyle: 'normal',//italic 
+            tooltipFontStretch: 'normal',//wider, narrower, ultra-condensed, extra-condensed, condensed, semi-condensed, semi-expanded, expanded, extra-expanded, ultra-expanded
+            tooltipFontToUpperCase:true,
+            tooltipDiffX: 0,
+            tooltipDiffY: 5
+        };
+    $('#holder').svg3DTagCloud( settings );
+});
+    });
+}
+let list_filters = function() {
+    fetch(new Request('filter?email=' + sessionStorage.email, {
+        method: 'GET'
+    })).then((response) => response.json()).then(function(data) {
+        filters = data;
+        list_filters();
+    });
+}

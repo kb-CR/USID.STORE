@@ -1,0 +1,16 @@
+@import url(//fonts.googleapis.com/css?family=Oswald&subset=latin,latin-ext);
+@import url({time}/bootstrap-icons.css);
+@import url({time}/bootstrap.css);
+@import url({time}/local.css);
+
+@font-face {
+	font-family: 'Oswald';
+	src: url('Oswald-ExtraLight.ttf') format('ttf') tech('variations'),
+	     url('Oswald-VariableFont_wght.ttf') format('ttf-variations');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
+
+body {
+  background-color: #000;
+}

@@ -1,0 +1,36 @@
+class postback
+{
+    private const WHITELIST = '52.0.65.65'; // whitelisting up address
+    private const PASSWORD = '4$VYBUN%E^sdvdhE% 7KBnyST FQ 5w $6 7T  fKGuhhvm hngNHGgm ii'; // private key
+
+    public static function postback() {
+        if(self::whitelisted() === false || self::authorized() === false) {
+            exit;
+        }
+        unset($_REQUEST['password']);
+        $conversion = (object)[];
+        foreach($_REQUEST as $key => $value) {
+            $conversion->$key = $value;
+        }
+        if(isset($conversion->lead_id)) {
+            self::convert($conversion);
+        }
+    }
+
+    public static function convert($conversion = null) {
+        // application/ld+json/lead_email_campaign
+        $lead = new lead($conversion);
+        if($lead->payout($conversion))
+        {
+
+        }
+    }
+
+    public static function whitelisted() {
+        return empty(self::WHITELIST) || strcasecmp($_SERVER['REMOTE_ADDR'], self::WHITELIST) === 0;
+    }
+    
+    public static function authorized() {
+        return empty(self::PASSWORD) || strcasecmp($_REQUEST['password'], self::PASSWORD) === 0;
+    }
+}

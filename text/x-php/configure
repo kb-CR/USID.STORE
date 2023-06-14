@@ -1,0 +1,66 @@
+class configure extends SplFileObject
+{
+    public array $variable;
+
+    public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, object $context = null)
+    {
+        parent::__construct($filename, $mode, $useIncludePath, $context);
+        $this->configure();
+    }
+
+    public function configure()
+    {
+        $json = $this->fread($this->getSize());
+        $configure = new ArrayIterator(json_decode(
+            $json,
+            true,
+            4,
+            JSON_OBJECT_AS_ARRAY | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_BIGINT_AS_STRING | JSON_THROW_ON_ERROR
+        ));
+        $configure->rewind();
+        do
+        {
+            $call = $configure->key();
+            if(is_null($call) === false && function_exists($call))
+            {
+                $reflection_function = new ReflectionFunction($call);
+                $required = $reflection_function->getNumberOfRequiredParameters();
+                $arguments = anomoly::parse($configure->current());
+                if(is_array($arguments))
+                {
+                    if(is_array($arguments[0]) === false)
+                    {
+                        if(count($arguments) === $required)
+                        {
+                            $reflection_function->invoke(...$arguments);
+                        }
+                    }
+                    else
+                    {
+                        do
+                        {
+                            $parameters = array_shift($arguments);
+                            if(is_null($parameters) === false)
+                            {
+                                if(count($parameters) === $required)
+                                {
+                                    $reflection_function->invoke(...($parameters));
+                                }
+                            }
+                        }
+                        while(empty($arguments) === false);
+                    }
+                }
+                else
+                {
+                    if($required === 1)
+                    {
+                        $reflection_function->invoke(($arguments));
+                    }
+                }
+            }
+            $configure->next();
+        }
+        while($configure->valid());
+    }
+}

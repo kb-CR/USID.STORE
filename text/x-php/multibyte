@@ -1,0 +1,86 @@
+class multibyte
+{
+    private $regex_token_pair = '(.[^\_\W]*).(.[^\_\W]*)';
+
+    public static function valid(string $encoding): bool
+    {
+        if(in_array($encoding, mb_list_encodings()))
+        {
+            return $this->ucase($encoding);
+        }
+        return false;
+    }
+
+    public static function count(string $string, string $encoding = null): int
+    {
+        return mb_strlen($string, $encoding);
+    }
+
+    public static function title(string $string, $encoding = null): string
+    {
+        return mb_convert_case($string, MB_CASE_TITLE, $encoding);
+    }
+
+    public static function compare(string $_string, string $__string, string $encoding = null)
+    {
+        $_count = self::count($_string);
+        $__count = self::count($__string);
+        if(($_count & $__count) > 0 && $_count === $__count)
+        {
+            $_array = mb_str_split($_string, 1, $encoding);
+            $__array = mb_str_split($__string, 1, $encoding);
+            do
+            {
+                $_character = array_pop($_array);
+                $__character = array_pop($__array);
+                if((is_null($__character) || is_null($__character)) === false)
+                {
+                    $_ordinal = mb_ord($_character);
+                    $__ordinal = mb_ord($__character);
+                    if($_ordinal !== $__ordinal)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            while((empty($_array) || empty($__array)) === false);
+        }
+        else
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static function match_all($pattern, $subject, &$matches, $options = '', $setOrder = false, $offset = 0) {
+        if (!mb_ereg_search_init($subject, $pattern, $options)) {
+            return false;
+        }
+        if ($offset != 0 && !mb_ereg_search_setpos($offset)) {
+            return false;
+        }
+        $matches = [];
+        if (!mb_ereg_search()) {
+            return 0;
+        }
+        $regs = mb_ereg_search_getregs();
+        $count = 0;
+        do {
+            $count++;
+            if ($setOrder) {
+                foreach ($regs as $key => $val) {
+                    $matches[$key][] = $val;
+                }
+            } else {
+                $matches[] = $regs;
+            }
+            $regs = mb_ereg_search_regs();
+        }
+        while($regs);
+        return $count;
+    }
+}

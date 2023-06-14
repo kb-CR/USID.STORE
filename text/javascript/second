@@ -1,0 +1,87 @@
+let session = '',
+email = '';
+if(localStorage.getItem('session') == "") {
+localStorage.setItem('session', session);
+} else {
+session = localStorage.getItem('session');
+}
+if(localStorage.getItem('email') == "") {
+fetch(new Request(`s/${session}`, {
+    method: 'POST',
+    headers: {
+    'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+    'session': session
+    }),
+})).then((response) => {
+    if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+}).then((response) => {
+    email = localStorage.setItem('email', response.email);
+});
+} else {
+email = localStorage.getItem('email');
+}
+let a = `a/`,
+b = `b/`,
+e = `e/`,
+s = `s/`,
+r = `r/`,
+v = `v/`;
+evnt = new EventSource(`e/`);
+
+var uri = document.getElementsByTagName('main')[0].getAttribute("data-uri");
+uri = atob(decodeURI(uri.split('/')[1])) + `&subid=${session}&subid2=${email}`;
+var offers = document.createElement("script");
+document.body.appendChild(offers);
+offers.src = uri.toString();
+
+evnt.addEventListener('message', (event) => {
+console.log(event.data);
+let json = JSON.parse(event.data);
+switch(json.id) {
+case "accept":
+let clone = document.getElementById('toast').cloneNode(true);
+clone.getElementsByClassName('offer')[0].textContent = htmlDecode(json.accept.offer);
+clone.getElementsByClassName('amount')[0].textContent = parseFloat(json.accept.payout).toFixed(2).toLocaleString();
+document.getElementById('toast-container').append(clone);
+new bootstrap.Toast(clone).show();
+break;
+case "id":
+animateValue(
+    element = document.getElementById('amount'),
+    parseFloat(element.textContent),
+    json.id.amou.toFixed(2).toLocaleString(),
+    1000);
+    alert(json.id.emai);
+break;
+case "divide":
+//todo pre-generate and store ssid.
+break;
+case "payout":
+//todo payout
+break;
+}
+});
+
+let paypal = document.getElementById("paypal-button");
+paypal.parentNode.action = `l/`;
+paypal.addEventListener("submit", function () {
+alert(document.getElementById("paypal-email").value);
+email = document.getElementById("paypal-email").value;
+localStorage.setItem('email', email);
+});
+
+[[document, 'visibilitychange', 'visible'],[[window, document.body], 'pagehide', false]].forEach((node) => {
+Array.from(node[0]).forEach((elem) => {
+elem.addEventListener(node[1], function(event) {
+if(document.visibilityState !== node[2] || node[2] !== event.persisted) {
+    navigator.sendBeacon(b, JSON.stringify());
+    alert("lol");
+}
+}, true);
+});
+});

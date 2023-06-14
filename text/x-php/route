@@ -1,0 +1,201 @@
+class route
+{
+    public int $levels = 2;
+    public SplFileInfo $file_info;
+    public SplFileInfo $mime_file;
+    public media $media;
+    public string $type;
+    public array $reroute = [];
+
+    public function __construct(media $media, SplFileInfo $file_info)
+    {
+        $this->media = $media;
+        $this->file_info = $file_info;
+        $this->type = $this->media->getMediaType($this->file_info);
+        $file = join(INI, [
+            CURRENT,
+            $this->type,
+            $this->file_info->getBasename(ONT.$this->file_info->getExtension())
+        ]);
+        $this->mime_file = new SplFileInfo($file);
+    }
+
+    public function binder($query): object
+    {
+        $results = [];
+        if(is_array($query))
+        {
+            $query = new ArrayIterator($query);
+            do
+            {
+                $results[$query->key()] = $query->current();
+                $query->next();
+            } while($query->valid());
+        }
+        return (object) $results;
+    }
+
+    public function SSE($query)
+    {
+        header(header::content_type('text/event-stream'));
+        $server = new server();
+        $server->sent($this->binder($query)->id);
+    }
+
+    public function offers($query)
+    {
+        $this->products($query);
+    }
+    
+    public function products($query)
+    {
+        $products = [];
+        if(isset($query['email']) && filter_var($query['email'], FILTER_VALIDATE_EMAIL))
+        {
+            
+            $product = new product(
+                $query['email'],
+                $_SERVER['REMOTE_ADDR'],
+                bin2hex(random_bytes(5))
+            );
+            $products = $product->series()->images;
+        }
+        else
+        {
+            //email invalid
+            echo "bad email.";
+        }
+        $json = json_encode($products, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        print($json);
+    }
+
+    public function filters($query)
+    {
+        if(isset($query['email']))
+        {
+            $filters = new filters(
+                $query['email'],
+                $_SERVER['REMOTE_ADDR'],
+                bin2hex(random_bytes(5))
+            );
+            print(json_encode($offers->linkset()->offerset, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        }
+        else
+        {
+            print('{}');
+        }
+    }
+
+    public function postback($query)
+    {
+        // Continue tracking lead data.
+        $lead = new lead();
+        $lead->postback($query);
+        $postback = new postback();
+        $postback->postback();
+    }
+
+    public function a($query)
+    {
+        $anchor = new anchor();
+        if($anchor->navigate($_REQUEST['path']) === false)
+        {
+            // this happens with any invalid uuid link or stale link set item
+            // we should send these events to special handlers - measure time since
+            // calculate quality, etc. may be old member, backlink, etc.
+            header(header::location('../'));
+            exit;
+        }
+    }
+
+    public function out(): string
+    {
+        if($this->mime_file->isReadable())
+        {
+            if(mb_stripos($this->type, 'font/', 0, null) !== 0)
+            {
+                header(header::content_type($this->type));
+            }
+            $file_object = $this->mime_file->openFile('r');
+            $file_object->fpassthru();
+            exit;
+        }
+        else if(isset($reroute[$this->mime_file->getRealPath()]))
+        {
+            $file_object = $reroute[$this->mime_file->getRealPath()]->openFile('r');
+            $file_object->fpassthru();
+        }
+        else if(($subroutine = explode(INI, trim($this->file_info))) && ($count = count($subroutine)) >= 2 && empty($subroutine[1]) === false)
+        {
+            $routine = $subroutine[1];
+            $url = parse_url($routine);
+            if(isset($url['path']))
+            {
+                if(method_exists($this, $url['path']))
+                {
+                    $routine = $url['path'];
+                    $search = '';
+                    if(isset($url['query']))
+                    {
+                        parse_str($url['query'], $search);
+                    }
+                    $this->{$routine}($search);
+                }
+            }
+        }
+        else
+        {
+            $html = new html(join(INI, [
+                getcwd(),
+                'text/html/radix'
+            ]));
+            $html->parse();
+            $html->out();
+        }
+        return '';
+    }
+
+    public static function code(): object
+    {
+        $http_accept_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+        $parameters = explode(',', $http_accept_language);
+        $code = [];
+        do
+        {
+            $parameter = explode(ASP, array_shift($parameters));
+            $value = mb_split('-|_', $parameter[0]);
+            $language_code = mb_strtolower($value[0]);
+            $country_code = null;
+            $quality = 1;
+            if(count($parameter) > 1)
+            {
+                parse_str($parameter[1], $quality);
+                if(isset($quality['q']))
+                {
+                    $quality = $quality['q'];
+                }
+            }
+            if(count($value) > 1)
+            {
+                $country_code = mb_strtoupper($value[1]);
+            }
+            $code[intval($quality)] = (object)[
+                'language' => $language_code,
+                'country' => $country_code,
+                'quality' => floatval($quality)
+            ];
+        } while(empty($parameters) === false);
+        return array_shift($code);
+    }
+
+    public static function platform(): object
+    {
+        $http_user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $android = mb_stristr($http_user_agent, 'android');
+        $ios = mb_stristr($http_user_agent, 'iphone') || mb_strstr($http_user_agent, 'iphone') || mb_stristr($http_user_agent, 'ipad');
+        return (object)[
+            'android' => $android,
+            'ios' => $ios
+        ];
+    }
+}

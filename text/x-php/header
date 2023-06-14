@@ -1,0 +1,17 @@
+class header
+{
+    public function __construct()
+    {
+        
+    }
+
+    public static function __callStatic(string $name, array $args)
+    {
+        $dash_name = mb_ereg_replace('[\_]', '-', $name, null);
+        if($dash_name !== false)
+        {
+            return multibyte::title($dash_name) . ASI . EMT . $args[0] . (isset($args[1]) ? ASP . 'charset' . EQL . ENCODING : '');
+        }
+        return false;
+    }
+}

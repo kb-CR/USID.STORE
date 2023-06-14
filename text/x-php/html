@@ -1,0 +1,44 @@
+class html extends SplFileObject
+{
+    private string $html;
+
+    public function __construct(string $file_name)
+    {
+        parent::__construct(($file_name));
+    }
+
+    public function parse()
+    {
+        $this->html = $this->fread($this->getSize());
+        $html = [];
+        $iterator = new DirectoryIterator($this->getPathInfo());
+        $iterator->rewind();
+        do
+        {
+            if($iterator->current()->isDot()){
+                $iterator->next();
+            }
+            $current = $iterator->current();
+            $file_info = new SplFileInfo(join(INI, [
+                $this->getPathInfo(),
+                $current
+            ]));
+            $file_object = $file_info->openFile('r', false);
+            $html["{$current}"] = $file_object->fread($file_object->getSize());
+            $iterator->next();
+        } while($iterator->valid());
+        $this->html = anomoly::parse($this->html, $html);
+        $html = null;
+        $this->html = $this->clean($this->html);
+    }
+
+    public function clean(string $html): string
+    {
+        return mb_ereg_replace('[\t\r\n\r]|[\s]{2,}', '', $html, null);
+    }
+
+    public function out()
+    {
+        print($this->html);
+    }
+}

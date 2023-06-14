@@ -1,0 +1,15 @@
+Storage.prototype.object = function(name, value = undefined) {
+    if(arguments.length > 0) {
+        try {
+            if (arguments.length == 2) {
+                return this.setItem(name, JSON.stringify(value));
+            }
+            if(this.length > 0) {
+                return JSON.parse(this.getItem(name) || '[]');
+            }
+        } catch (exception) {
+            return exception instanceof DOMException && (exception.code === 22 || exception.code === 1014 || exception.name === 'QuotaExceededError' || exception.name === 'NS_ERROR_DOM_QUOTA_REACHED') && (this && this.length !== 0);
+        }
+    }
+    return [];
+}

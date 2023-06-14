@@ -1,0 +1,55 @@
+class anomoly extends SplFileInfo
+{
+    public static function parse(mixed $arguments, &$parameters = []): mixed
+    {
+        if(is_array($arguments))
+        {
+            $parsed = [];
+            do
+            {
+                $argument = array_shift($arguments);
+                array_push($parsed, self::parse($argument, $parameters));
+            }
+            while(empty($arguments) === false);
+            return $parsed;
+        }
+        else
+        {
+            //{$X} constant | function | variable | string
+            $arguments = mb_ereg_replace_callback('\{(.[^\}]*)\}', function($matches) use ($parameters) {
+                $property = $matches[1];
+                if(defined($property))
+                {
+                    return constant($property);
+                }
+                else if(function_exists($property))
+                {
+                    $reflection_function = new ReflectionFunction($property);
+                    if($reflection_function->getNumberOfRequiredParameters() == 0)
+                    {
+                        return $reflection_function->invoke();
+                    }
+                }
+                else if(isset(${$property}))
+                {
+                    return ${$property};
+                }
+                else
+                {
+                    
+                    $result = $matches[0];
+                    if(isset($parameters[$property]))
+                    {
+                        $result = $parameters[$property];
+                        unset($parameters[$property]);
+                        $result = self::parse($result, $parameters);
+                    }
+                    // Anomolous & backward-incompatable.
+                    return $result;
+                }
+            },
+            $arguments);
+            return $arguments;
+        }
+    }
+}

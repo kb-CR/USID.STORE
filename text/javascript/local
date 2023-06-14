@@ -1,0 +1,177 @@
+let input_group = document.getElementById("input-group");
+let email_address = document.getElementById("email-address");
+let tooltipSeed = document.getElementById("tooltip");
+let email = document.getElementById("email");
+let form = document.getElementById('user-input');
+let tooltip;
+let tooltip_options = {};
+let offcanvas;
+let offcanvas_options = {};
+let weather_post_cast = [];
+let ticks = 0;
+let last_email_report = undefined;
+
+
+
+let bootstrap = function () {
+    share();
+    document.addEventListener('DOMContentLoaded', function() {
+        tooltip = new bootstrap.Tooltip('#tooltip', tooltip_options);
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        offcanvas = new bootstrap.Offcanvas('#offcanvas', offcanvas_options);
+    });
+}
+let local_session = function() {
+    window.addEventListener('storage', (event) => {
+        // Storage Change Event
+        console.log('Storage Event');
+    });
+
+    //Note: For use cases that need the ability to send requests with methods other than POST,
+    // or to change any request properties, or that need access to the server response, 
+    //instead use the fetch() method with keepalive set to true.
+    document.onvisibilitychange = () => {
+        console.log('Visibility Change Event');
+        if (document.visibilityState === 'hidden') {
+            navigator.sendBeacon('quality', JSON.stringify(sessionStorage));
+            transfer(localStorage, sessionStorage);
+        }
+    };
+    window.addEventListener("pagehide", (event) => {
+        console.log("Page Hide Event");
+        if (!event.persisted) {
+            session.transfer(localStorage, sessionStorage);
+            /* the page is being discarded, so it can be reused later */
+        }
+    }, false);
+}
+let feedback_email = function(event) {
+    if (!email.checkValidity()) {
+        email_address.classList.add("is-invalid");
+        email_address.classList.remove("is-valid");
+        email.classList.remove('is-valid');
+        email.classList.add('is-invalid');
+    } else {
+        email_address.classList.remove("is-invalid");
+        email_address.classList.add("is-valid");
+        email.classList.remove('is-invalid');
+        email.classList.add('is-valid');
+        sessionStorage.email = email.value;
+        set_email(email.value);
+    }
+    email.classList.remove('needs-validated');
+    email.classList.add('was-validated');
+    email_address.title = email.validationMessage;
+    email.title = email.validationMessage;
+    if(event && event['keyCode'] && event.keyCode == 13) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    }
+};
+let email_load = function(event) {
+    if(session.email !== undefined) {
+        email.value = session.email;
+    } else {
+        email.value = '';
+    }
+};
+let email_click = function(event) {
+    document.getElementById('email').focus();
+    document.getElementById('email').select();
+};
+let email_introduction = function() {
+    tooltipSeed.classList.add("visually-hidden");
+    email_address.removeAttribute("hidden");
+    email.removeAttribute("hidden");
+    input_group.classList.add("show");
+    email.focus();
+    email.addEventListener('change', feedback_email, false);
+    email.addEventListener('keyup', feedback_email, false);
+    email_address.addEventListener('click', email_click, false);
+}
+let share = function() {
+    document.querySelector("#offcanvasLabel a").addEventListener('click', function(event) {
+        if(navigator['share']) {
+            event.preventDefault();
+            event.stopPropagation();
+            const data = {
+                title: 'USID Store',
+                text: 'Offers to engage with an application for a payout.',
+                url: 'https://usid.store/'
+            }
+            async () => {
+                try {
+                    await navigator.share(data);
+                } catch (exception) {
+                    console.log("no click");
+                }
+            }
+        }
+    });
+}
+function local_session_registered(event) {
+    email_load();
+    email_introduction();
+    feedback_email(event);
+    list_products();
+}
+function local_weather_cast() {
+    // cast template to render weather "as needed"
+    let cast = document.getElementById('cast');
+    let weather = document.getElementsByClassName('weather');
+    Array.from(weather).forEach(element => {
+        element.style.top = Math.floor(Math.random() * window.innerHeight);
+        element.style.left = Math.floor(Math.random() * window.innerWidth);
+        element.addEventListener('transitionend', (event) => {
+            setTimeout(function() { local_weather_post_cast(event.target) }, Math.floor(Math.random() * (3600 - 180) + 180));
+        });
+        local_weather_post_cast(element);
+    });
+}
+function filter() {
+    let limit = document.getElementById('limit');
+    let filter = document.getElementById('filter');
+    filter.addEventListener('input', function(event) {
+        if(filter.value.length == 0) {
+            limit.classList.add("visually-hidden");
+            limit.classList.remove("h-25");
+            limit.classList.remove("h-50");
+            limit.classList.remove("h-75");
+        } else if(filter.value.length == 1) {
+            limit.classList.remove("visually-hidden");
+            limit.classList.remove("h-50");
+            limit.classList.remove("h-75");
+            limit.classList.add("h-25");
+        } else if(filter.value.length == 2) {
+            limit.classList.remove("h-25");
+            limit.classList.remove("h-75");
+            limit.classList.add("h-50");
+        } else if(filter.value.length >= 3) {
+            limit.classList.remove("visually-hidden");
+            limit.classList.remove("h-25");
+            limit.classList.remove("h-50");
+            limit.classList.add("h-75");
+        }
+    });
+}
+function local_weather_post_cast(element) {
+    // animate: opacity,font-size,location
+    //alert(element.style.top);
+    if(ticks > Math.random() * 700){
+        element.style.top = Math.floor(Math.random() * window.innerHeight);
+        element.style.left = Math.floor(Math.random() * window.innerWidth);
+        ticks = 0;
+    }
+    ticks++;
+    element.style.opacity = Math.random() * (1 - 0.3) + 0.3;
+    element.style.fontSize = Math.floor(Math.random() * (400 - 200) + 200);
+}
+document.addEventListener("DOMContentLoaded", function(event) {
+    filter();
+    bootstrap();
+    local_session();
+    local_weather_cast();
+    local_session_registered(event);
+});

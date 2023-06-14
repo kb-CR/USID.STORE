@@ -1,0 +1,12 @@
+class application
+{
+    public function play()
+    {
+        
+    }
+
+    public function store()
+    {
+        
+    }
+}

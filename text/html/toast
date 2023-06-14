@@ -1,0 +1,14 @@
+<div id="toast-container" class="toast-container bottom-0 end-0 p-5">
+<div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="toast-header">
+<strong class="me-auto">
+<i class="bi bi-plus-lg"></i>
+<i class="bi bi-currency-dollar"></i>
+<span class="amount"></span>
+<i class="bi bi-chevron-compact-right"></i>
+<span class="offer"></span>
+</strong>
+<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+</div>
+</div>
+</div>

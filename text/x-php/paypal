@@ -1,0 +1,98 @@
+/*
+ * Postback Example Script.  This script is meant to only be a rough outline of
+ * how a postback should operate, and not necessarily used out of the box.
+ * 
+ * Copyright 2015. CPAlead, LLC. All Rights Reserved
+ */
+require_once("http.php");
+
+//$base_url = "https://api-m.sandbox.paypal.com";
+//$client_id = "AX11ISXwGItfWO3e3Yo-mhbLbB0b0YA2jqCcO-BLS0nKdjIMKG_twACFdDI6TrmXR4mNuiOZlH8Zbl8t";
+//$client_secret = "EL8VfQ8nqYyW90YS9LMbq4OHjZR00sV9zuTOz1vXfoaAwkPCuYo67xxjOwkVvgbjuRDlyE3dsfQgWPFd";
+
+class paypal {
+    const BASE_URL = "https://api-m.paypal.com";
+    const CLIENT_ID = "Ae5EtNIJVVyMuLz7vVhrX4n16bUAopP9dmaQcjjG0N7kHGjJsvYfbmgr7J8I6JM_et4w2ChmXbYkI_ey";
+    const CLIENT_SECRET = "EP4kPUeB1ZdlRft4VF7nn4dZBkRv4nZ7tfsKR9vXLTu7XyZHFaA4lKPgD9CWjBdDveVU5k4T0x9k3IO8";
+
+    public static function oauth2() {
+        $url = self::BASE_URL . "/v1/oauth2/token";
+        $headers = [
+            'Accept'=> 'application/json',
+            'Authorization' => 'Basic ' . base64_encode(self::CLIENT_ID . ":" . self::CLIENT_SECRET),
+            'Content-Type' => 'application/x-www-form-urlencoded'
+        ];
+        $data = uri::search([
+            'grant_type' => "client_credentials"
+        ]);
+        return json_decode(http::request(method::POST, $url, $headers, $data)->response);
+    }
+
+    public static function balances($oauth2) {
+        $search = http_build_query([
+            "currency_code" => "ALL"
+        ]);
+        $url = self::BASE_URL . "/v1/reporting/balances?{$search}";
+        $headers = [
+            'Authorization' => "Bearer {$oauth2->access_token}"
+        ];
+        return json_decode(http::request(method::GET, $url, $headers)->response);
+    }
+
+    public static function available_balance($oauth2, $currency_code) {
+        $search = http_build_query([
+            "currency_code" => strtoupper($currency_code)
+        ]);
+        $url = self::BASE_URL . "/v1/reporting/balances?{$search}";
+        $headers = [
+            'Authorization' => "Bearer {$oauth2->access_token}"
+        ];
+        return json_decode(http::request(method::GET, $url, $headers)->response)->balances[0]->available_balance->value;
+    }
+
+    /*
+        A return status code of HTTP 201 Created.
+        A JSON response body with the payout_batch_id. Use the payout_batch_id in the show payout batch details endpoint to get a detailed record of each item in the payout.
+        Tip: You can log into your PayPal business account and see payout details on the Activity and Reports pages.
+    */
+    public static function payout($oauth2, $itemid, $receiver, $value, $note, $payout_batch_id, $subject, $message) {
+        $search = http_build_query([
+            "items" => [
+                [
+                    "recipient_wallet" => "RECIPIENT_SELECTED",
+                    "sender_item_id" => $itemid,
+                    "recipient_type" => "EMAIL",
+                    "receiver" => $receiver,
+                    "amount" => [
+                        "currency" => "USD",
+                        "value" => $value
+                    ],
+                    "note" => $note
+                ]
+            ],
+            "sender_batch_header" => [
+                "sender_batch_id" => $payout_batch_id,
+                "recipient_type", "EMAIL",
+                "email_subject" => $subject,
+                "email_message" => $message,
+            ]
+        ]);
+        $uri = self::BASE_URL . "v1/payments/payouts?{$search}";
+        $headers = [
+            'Authorization' => "Bearer {$oauth2->access_token}"
+        ];
+        //HTTP 201 Created
+        //batch_header.payout_batch_id
+        $response = http::request(method::POST, $uri, $headers);
+        if($response->header->status->code == "201" && $response->header->status->reason_phrase == "Created") {
+            $json = json_decode($response->body);
+            if(isset($json->batch_header->payout_batch_id)) {
+                return (object) [
+                    "payout_batch_id" => $json->batch_header->payout_batch_id,
+                    "batch_status" => $json->batch_header->batch_status
+                ];
+            }
+        }
+        return false;
+    }
+}

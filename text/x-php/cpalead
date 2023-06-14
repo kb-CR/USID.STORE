@@ -1,0 +1,153 @@
+class cpalead
+{
+    private const URI = 'https://cpalead.com/dashboard/reports/campaign_json.php';
+
+    private static function search($parameters)
+    {
+        return http_build_query([
+            'offerwall_offers' => $parameters->offerwall_only,
+            'device' => join(',', $parameters->platform),
+            'country' => $parameters->country,
+            'format' => $parameters->format,
+            'dating' => $parameters->dating,
+            'subid' => $parameters->subid,
+            'subid2' => $parameters->subid2,
+            'subid3' => $parameters->subid3,
+            'id' => $parameters->affiliate_id
+        ]);
+    }
+
+    public static function request($parameters = [])
+    {
+        return join('?', [self::URI, self::search((object) $parameters)]);
+    }
+
+    public static function tokenize(string $string)
+    {
+        return preg_split('/(?<=[0-9])(?=[a-z]+)|([^\p{L}\p{N}\w\S\p{M}]+|[\p{P}\p{C}\p{S}\p{Z}\h\v]+)/uiU', trim($string), -1, (PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY));
+    }
+    
+    public function id($offer)
+    {
+        if(!empty($offer->preview_url)) {
+            $uri = parse_url($offer->preview_url);
+            if(isset($uri['query'])) {
+                parse_str($uri['query'], $search);
+                if(isset($search['id'])) {
+                    return $search['id'];
+                }
+            }
+            if(isset($uri['path'])) {
+                $path = explode(DIRECTORY_SEPARATOR, $uri['path']);
+                $last = $path[count($path) - 1];
+                if(strpos(strtolower($last), 'id') === 0) {
+                    return $last;
+                }
+            }
+        }
+        //never...
+        return false;
+    }
+
+    public function uri($offer)
+    {
+        return parse_url($offer->preview_url);
+    }
+
+    public function platform($offer)
+    {
+        $platform = strtoupper($offer->mobile_app_type[0]);
+        switch($platform) {
+            case 'A':
+                return ucfirst($offer->mobile_app_type);
+            case 'I':
+                return lcfirst($offer->mobile_app_type);
+        }
+        return strtolower($offer->mobile_app_type);
+    }
+
+    public function system($offer): float|false
+    {
+        if(isset($offer->mobile_app_minimum_version)) {
+            $system = floatval($offer->mobile_app_minimum_version);
+            if($system > 0) {
+                return $system;
+            }
+        }
+        return false;
+    }
+
+    public function country($offer)
+    {
+        return $offer->country;
+    }
+
+    public function name($offer)
+    {
+        return [
+            $this->tokenize($offer->title)
+        ];
+    }
+
+    public function description($offer)
+    {
+        $description = $offer->description;
+        if(strcasecmp($description, $offer->conversion) === 0) {
+            return [];
+        }
+        return ['en' => [
+            $this->tokenize($description)
+        ]];
+    }
+
+    public function double($offer): float
+    {
+        return round(floatval($offer->amount), 2);
+    }
+
+    public function currency($offer)
+    {
+        // adding this merely adds the USD currency, which we know
+        //$offer->payout_currency
+        return [];
+    }
+
+    public function prerequisite($offer)
+    {
+        preg_match("/\s?\((.*)\)/s", $offer->conversion, $prerequisites);
+        if(count($prerequisites) > 0) {
+            $prerequisites = preg_split('/[\,]|and/i', $prerequisites[1]);
+            foreach($prerequisites as $key => $value) {
+                $prerequisites[$key] =  $this->tokenize(trim($value));
+            }
+            return [
+                $prerequisites
+            ];
+        }
+        return [];
+    }
+
+    public function engagement($offer)
+    {
+        // fallback on category_name default is install & open
+        //echo $category_name = $offer->category_name;
+        // conversion remove known prerequisistes.
+        $conversion = preg_replace("/\s?\(.*\)/s", '', $offer->conversion);
+        $conversion = preg_split('/[\+\,]|and/i', $conversion);
+        foreach($conversion as $key => $value) {
+            $conversion[$key] = $this->tokenize(trim($value));
+        }
+        return $conversion;
+    }
+
+    public function valuation($offer)
+    {
+        return round(floatval($offer->epc), 2);
+    }
+
+    public function ratio($offer)
+    {
+        return floatval($offer->ratio);
+    }
+
+}

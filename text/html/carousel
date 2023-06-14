@@ -1,0 +1,19 @@
+<div class="carousel container justify-content-center p-0" data-bs-ride="carousel" id="offer">
+<div id="carousel" class="row g-0 placeholder-glow pe-none wait">
+<button id="previous" class="carousel-control-prev col-2" data-bs-theme="dark" data-bs-slide="prev" data-bs-target="#offer" type="button">
+<span aria-hidden="true" class="carousel-control-prev-icon" style="filter: invert(1) grayscale(100);"></span>
+<span class="visually-hidden">Previous</span>
+</button>
+<div class="col-8 my-3">
+<div class="carousel-inner" id="inner">
+<div class="carousel-item" id="item">
+{card}
+</div>
+</div>
+</div>
+<button id="next" class="carousel-control-next col-2" data-bs-slide="next" data-bs-target="#offer" type="button">
+<span aria-hidden="true" class="carousel-control-next-icon" style="filter: invert(1) grayscale(100);"></span>
+<span class="visually-hidden">Next</span>
+</button>
+</div>
+</div>

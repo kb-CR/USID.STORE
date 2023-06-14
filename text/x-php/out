@@ -1,0 +1,28 @@
+class out
+{
+    public static function put()
+    {
+        //ob_start();
+        //ob_start('ob_gzhandler', 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+        //ob_start('mb_output_handler', 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+    }
+
+    public static function get()
+    {
+        $mb = [
+            ob_get_clean(),
+            //ob_get_length()
+        ];
+        $gz = [
+            ob_get_clean(),
+            //ob_get_length()
+        ];
+        if($mb[1] >= $gz[1])
+        {
+            $gz = $mb;
+        }
+        //header('Content-Length: ' . $gz[1]);
+        //echo($gz[0]);
+        //ob_end_flush();
+    }
+}

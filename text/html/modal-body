@@ -1,0 +1,4 @@
+<form action="" name="get" id="no-captcha" method="POST">
+<div class="modal-body">
+<div class="h-captcha text-center" data-sitekey="3d0a2cc5-647d-4dce-8e64-2b2ae29b41a9"></div>
+</div>

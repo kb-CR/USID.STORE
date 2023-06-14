@@ -1,0 +1,26 @@
+<div class="card-header bg-gradient p-0 m-0">
+<div class="row g-0 p-2 align-items-center">
+<div class="col-10 user-select-all">
+<h2 class="card-title text-white-50 placeholder-glow m-0">
+<i id="name" class="bi bi-app spinner-grow  pe-none user-select-none">
+<strong>
+</strong>
+<span class="visually-hidden">
+&nbsp;
+</span>
+<small id="card-subtitle" class="card-subtitle position-absolute ms-2 mt-0">
+</small>
+</i>
+</h2>
+</div>
+<form id="close" name="close" method="POST" class="col d-flex justify-content-end h-100 p-0 m-0">
+<div class="spinner spinner-grow" id="basic-addon-spinner" role="status">
+<span class="visually-hidden">
+We are patiently growing a Local Session Tree...
+</span>
+</div>
+<button aria-label="Close" class="btn-close btn-close-white" hidden rel="nofollow,noindex" type="submit">
+</button>
+</form>
+</div>
+</div>

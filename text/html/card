@@ -1,0 +1,5 @@
+<card id='card' style='cursor:grab;word-wrap:normal!important'>
+{card-header}
+{card-body}
+{card-footer}
+</card>

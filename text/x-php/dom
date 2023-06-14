@@ -1,0 +1,19 @@
+class dom
+{
+    static function toDOMDocument($response) {
+        libxml_use_internal_errors(true);
+        $document = new DOMDocument();
+        $str = '<?xml encoding="' . ENCODING . '" ?>'."\r\n{$response}";
+        $document->loadHTML($str);
+        return $document;
+    }
+
+    static function getJSONLDList($document) {
+        libxml_use_internal_errors( 1 );
+        $xpath = new DOMXpath( $document );
+        $jsonScripts = $xpath->query( '//script[@type="application/ld+json"]' );
+        $json = trim( $jsonScripts->item(0)->nodeValue );
+        return json_decode( $json );
+    }
+    
+}

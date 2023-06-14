@@ -1,0 +1,68 @@
+class anchor
+{
+    private string $request;
+    private string $personal;
+
+    public function navigate($request)
+    {
+        $data = array(
+            'secret' => "0x5e13E6e57811B4a4d556ACCCCA5C38fa7e83eC76",
+            'response' => $_POST['h-captcha-response']
+        );
+        $verify = curl_init();
+        curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+        curl_setopt($verify, CURLOPT_POST, true);
+        curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($verify);
+        // var_dump($response);
+        $responseData = json_decode($response);
+        if($responseData->success) {
+            // your success code goes here
+            $segment = explode(INI, $request);
+            // UUID of Personal LinkSet is two levels, and a base of A.
+            if(count($segment) == 3)
+            {
+                $this->personal = 'application/linkset/' . $segment[1];
+                if(file_exists($this->personal))
+                {
+                    $linkset = file_get_contents($this->personal);
+                    $linkset = json_decode($linkset, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    $iterator = new ArrayIterator($linkset);
+                    do
+                    {
+                        $value = $iterator->current();
+                        if(strcasecmp($request, $value['href']) === 0)
+                        {
+                            // Delete LinkSet - To reginerate upon iteration of system.
+                            unlink($this->personal);
+                            // Begin tracking minimal data to process payouts.
+                            $lead = new lead();
+                            $lead->outbound($segment[1], $segment[2], $value['anchor']);
+                            // Since the LinkSet is destroyed, we may be impermanent.
+                            $this->external_temporary_redirect($value['anchor']);
+                            return true;
+                        }
+                        $iterator->next();
+                    } while($iterator->valid());
+                }
+            }
+            return false;
+        } 
+        else {
+            header('Location: ../');
+            exit;
+        }
+    }
+
+    public function external_temporary_redirect($anchor)
+    {
+        // Send minimal/no referrer data.
+        header('Referrer-Policy: no-referrer');
+        // Do not permit indexing and/or following.
+        header('X-Robots-Tag: noindex,nofollow', true);
+        // Use a temporary redirect, as these are temporary anchors.
+        header('Location: ' . $anchor, true, 307);
+        exit;
+    }
+}

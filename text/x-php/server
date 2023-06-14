@@ -1,0 +1,137 @@
+class server
+{
+    public $id;
+    public $retry;
+    public $event;
+    public $data;
+    private $open;
+    private $error;
+    private $message;
+    private identity $identity;
+    public bool $streaming = true;
+    private int $last = -1;
+    public array $name = [
+        0 => 'HTTP_LAST_EVENT_ID',
+        1 => 'Cache-Control',
+        2 => ':',
+        3 => 'no-store',
+        4 => 'Content-Type',
+        5 => 'text',
+        6 => '/',
+        7 => 'event-stream',
+        8 => ';',
+        9 => 'charset',
+       10 => '=',
+       11 => 'utf-8',
+       12 => 'id',
+       13 => 'retry',
+       14 => 'event',
+       15 => 'data',
+       16 => "\n",
+       17 => 'Location',
+       18 => 'private',
+    ];
+
+    public function __construct(...$args)
+    {
+        $this->identity = new identity();
+    }
+
+    public function last($id = true)
+    {
+        if($this->last == -1 || $id !== true) {
+            if(isset($_SERVER[$this->name[0]]) && is_int($_SERVER[$this->name[0]]) && $_SERVER[$this->name[0]] < PHP_INT_MAX) {
+                $this->last = $_SERVER[$this->name[0]];
+            } else {
+                $this->last = 0;
+            }
+        }
+        $this->last++;
+    }
+
+    public function ok($no_content = false)
+    {
+        http_response_code($no_content ? 204 : 200);
+        header(join('', [$this->name[1], $this->name[2], $this->name[3]]));
+    }
+
+    
+    public function temporary_redirect($uri, $moved_permanently = true)
+    {
+        http_response_code($moved_permanently ? 307 : 301);
+        header(join('', [$this->name[17], $this->name[2], $uri]));
+        exit;
+    }
+
+    public function name(serverSent $event) {
+        return join('', [$this->name[$event], $this->name[2], $this->{serverSent::from($event->value)}]);
+    }
+
+    public function head($name, $data)
+    {
+        $this->data = $data;
+        $this->event = $this->message($name, serverSent::data);
+        return $this->name(serverSent::event);
+    }
+
+    public function body(int|string $data_id, string...$name_data)
+    {
+        if(is_int($this->id))
+        {
+            $this->id = $data_id;
+        }
+        $this->data = $data_id;
+        $this->event = $this->message($name_data, serverSent::data->value);
+        if(is_int($data_id)) {
+            return $this->message(array_map([$this, $this->name[12]], $name_data), serverSent::id->value); //0\n1\n \n\n
+        }
+        return serverSent::event->name; //0\n1\n \n\n
+    }
+
+    public function message(...$data)
+    {
+        return join($this->name[16],array_merge($data,[$this->name[16]])); //0\n \n\n
+    }
+
+    public function open()
+    {
+        $this->identity = new identity();
+        $this->identity->start();
+        $_SESSION['id'] = $this->identity->id();
+        $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+        $_SESSION['last'] = $this->last();
+    }
+
+    public function sent($id)
+    {   
+        ob_start();
+        $this->streaming = true;
+        do {
+            if(empty($id) || strlen($id) !== identity::LENGTH || preg_match("/^[A-Za-z0-9\,\-]+$/", $id, $matces) !== 1) {
+                header(join('', [$this->name[1], $this->name[2], $this->name[3]]));
+                $this->ok(false);
+                $this->open();
+                print_r('data:'.$this->message(json_encode($_SESSION)));
+                if(isset($_SESSION['success']) === false) {
+                    $this->temporary_redirect('SSE?id=' . $_SESSION['id']);
+                    $_SESSION['success'] = true;
+                }
+                exit;
+            } else {
+                header(join('', [$this->name[4], $this->name[2], $this->name[5], $this->name[6], $this->name[7], $this->name[8], $this->name[9], $this->name[10], $this->name[11]]));
+                $this->identity->id($id);
+                $this->open();
+                print_r('data:' . $this->message(json_encode($_SESSION)));
+            }
+            do {
+                ob_end_flush();
+            } while (connection_aborted() === false && ob_get_level() > 0);
+            flush();
+            if(connection_aborted()) {
+                $this->streaming = false;
+                break;
+            }
+        } while ($this->streaming && connection_aborted() === false);
+        exit;
+    }
+}

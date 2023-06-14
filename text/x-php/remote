@@ -1,0 +1,31 @@
+class remote extends SplFileInfo
+{
+    public int $expire = 259200;
+
+    public function __construct(string $file_name)
+    {
+        parent::__construct($file_name);
+    }
+
+    public function __destruct()
+    {
+        $this->garbage();
+    }
+
+    public function garbage()
+    {
+        if($this->isFile() && $this->expired())
+        {
+            unlink($this->getRealPath());
+        }
+    }
+
+    public function expired()
+    {
+        if((time() - $this->getMTime()) >= $this->expire)
+        {
+            return true;
+        }
+        return false;
+    }
+}

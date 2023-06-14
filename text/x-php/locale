@@ -1,0 +1,17 @@
+class locale
+{
+    public function __construct()
+    {
+        $this->setLocale($this->fromAgent());
+    }
+
+    public static function fromAgent()
+    {
+        return Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+    }
+
+    public static function setLocale($locale)
+    {
+        setlocale(LC_ALL, $locale);
+    }
+}
