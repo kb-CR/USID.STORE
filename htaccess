@@ -1,0 +1,8 @@
+Options +FollowSymLinks
+<IfModule mod_headers.c>
+    Header set Referrer-Policy "same-origin"
+</IfModule>
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)(/)?$ radix.php?path=$1 [L,NC,QSA]
+</IfModule>
